@@ -1,5 +1,5 @@
 #!/bin/bash
-source ~/miniconda3/etc/profile.d/conda.sh
+source /parallel_scratch/yc01847/miniconda3/etc/profile.d/conda.sh
 conda activate visual-sound
 
 python train.py \
