@@ -1,3 +1,7 @@
+#!/bin/bash
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate visual-sound
+
 python train.py \
   --hdf5FolderPath /parallel_scratch/yc01847/fair-play/splits/split1 \
   --name mono2binaural \
