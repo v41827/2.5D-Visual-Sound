@@ -1,32 +1,20 @@
 python train.py \
-  --hdf5FolderPath /parallel_scratch/yc01847/fair-play/splits/split1 \       # Path to HDF5 dataset
-  --name mono2binaural \                                            # Name of the experiment
-  --model audioVisual \                                             # Model type
-  --checkpoints_dir /parallel_scratch/yc01847/2.5D-Visual-Sound/checkpoints \                        # Directory to save checkpoints
-
-  # Saving and display frequencies
-  --save_epoch_freq 10 \                                            # Save checkpoint every 50 epochs
-  --save_latest_freq 5 \                                          # Save latest model every 100 iterations
-  --display_freq 2 \                                               # Display training progress every 10 iterations
-
-  # Training settings
-  --batchSize 256 \                                                 # Batch size
-  --learning_rate_decrease_itr 10 \                                 # Interval to decrease learning rate
-  --niter 10 \                                                    # Number of iterations
-  --lr_visual 0.0001 \                                              # Learning rate for visual branch
-  --lr_audio 0.001 \                                                # Learning rate for audio branch
-
-  # Hardware settings
-  --nThreads 4 \                                                   # Number of data loading threads
-  --gpu_ids 0 \                                       # Use GPUs 0–7
-
-  # Validation settings
-  --validation_on \                                                 # Enable validation
-  --validation_freq  5 \                                           # Run validation every 100 iterations
-  --validation_batches 2 \                                         # Number of validation batches
-
-  # Logging
-  --tensorboard False \                                              # Enable TensorBoard logging
-
-  # Save both stdout and stderr to log file
+  --hdf5FolderPath /parallel_scratch/yc01847/fair-play/splits/split1 \
+  --name mono2binaural \
+  --model audioVisual \
+  --checkpoints_dir /parallel_scratch/yc01847/2.5D-Visual-Sound/checkpoints \
+  --save_epoch_freq 10 \
+  --save_latest_freq 5 \
+  --display_freq 2 \
+  --batchSize 256 \
+  --learning_rate_decrease_itr 10 \
+  --niter 10 \
+  --lr_visual 0.0001 \
+  --lr_audio 0.001 \
+  --nThreads 4 \
+  --gpu_ids 0 \
+  --validation_on \
+  --validation_freq 5 \
+  --validation_batches 2 \
+  --tensorboard False \
   |& tee -a mono2binaural.log
