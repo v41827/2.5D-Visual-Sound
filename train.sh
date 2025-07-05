@@ -1,8 +1,8 @@
 python train.py \
-  --hdf5FolderPath /YOUR_CODE_PATH/2.5d_visual_sound/hdf5/ \       # Path to HDF5 dataset
+  --hdf5FolderPath /parallel_scratch/yc01847/fair-play/splits/split1 \       # Path to HDF5 dataset
   --name mono2binaural \                                            # Name of the experiment
   --model audioVisual \                                             # Model type
-  --checkpoints_dir /YOUR_CHECKPOINT_PATH/ \                        # Directory to save checkpoints
+  --checkpoints_dir /parallel_scratch/yc01847/checkpoints/mono2binaural \                        # Directory to save checkpoints
 
   # Saving and display frequencies
   --save_epoch_freq 10 \                                            # Save checkpoint every 50 epochs
