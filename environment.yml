@@ -1,4 +1,4 @@
-name: base
+name: visual-sound
 channels:
   - defaults
 dependencies:
