@@ -34,8 +34,6 @@ dependencies:
   - libffi=3.4.4
   - libgcc-ng=11.2.0
   - libgomp=11.2.0
-  - libmamba=2.0.5
-  - libmambapy=2.0.5
   - libmpdec=4.0.0
   - libnghttp2=1.57.0
   - libsolv=0.7.30
@@ -63,7 +61,6 @@ dependencies:
   - pygments=2.19.1
   - pysocks=1.7.1
   - python=3.9.18
-  - python_abi=3.9
   - readline=8.2
   - reproc=14.2.4
   - reproc-cpp=14.2.4
