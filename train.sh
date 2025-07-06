@@ -15,7 +15,7 @@ python train.py \
   --niter 10 \
   --lr_visual 0.0001 \
   --lr_audio 0.001 \
-  --nThreads 4 \
+  --nThreads 0 \
   --gpu_ids 0 \
   --validation_on \
   --validation_freq 5 \
