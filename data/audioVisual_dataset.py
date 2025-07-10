@@ -56,7 +56,8 @@ class AudioVisualDataset(BaseDataset):
         #load hdf5 file here
         h5f_path = os.path.join(opt.hdf5FolderPath, opt.mode+".h5")
         h5f = h5py.File(h5f_path, 'r')
-        self.audios = h5f['audio'][:]
+        #self.audios = h5f['audio'][:] 
+        self.audios = [p.decode() for p in h5f['audio'][:]]
 
         normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -68,15 +69,15 @@ class AudioVisualDataset(BaseDataset):
     def __getitem__(self, index):
         #load audio
         audio, audio_rate = librosa.load(self.audios[index], sr=self.opt.audio_sampling_rate, mono=False)
-
+        #audio = self.audios[index]  # its already waveform
         #randomly get a start time for the audio segment from the 10s clip
-        audio_start_time = random.uniform(0, 9.9 - self.opt.audio_length)
-        audio_end_time = audio_start_time + self.opt.audio_length
-        audio_start = int(audio_start_time * self.opt.audio_sampling_rate)
-        audio_end = audio_start + int(self.opt.audio_length * self.opt.audio_sampling_rate)
-        audio = audio[:, audio_start:audio_end]
-        audio = normalize(audio)
-        audio_channel1 = audio[0,:]
+        audio_start_time = random.uniform(0, 9.9 - self.opt.audio_length) 
+        audio_end_time = audio_start_time + self.opt.audio_length #Calculates the end time of the audio segment
+        audio_start = int(audio_start_time * self.opt.audio_sampling_rate) #Converts the start time (in seconds) to a sample index
+        audio_end = audio_start + int(self.opt.audio_length * self.opt.audio_sampling_rate) #Calculates the end sample index for the segment
+        audio = audio[:, audio_start:audio_end] #Extracts the audio segment (for both channels) between the calculated start and end indices.
+        audio = normalize(audio) #normalise the audio segment to a fixed rms value for consistent volume
+        audio_channel1 = audio[0,:] #separate two channels
         audio_channel2 = audio[1,:]
 
         #get the frame dir path based on audio path
@@ -86,8 +87,8 @@ class AudioVisualDataset(BaseDataset):
         frame_path = '/'.join(path_parts)
 
         # get the closest frame to the audio segment
-        #frame_index = int(round((audio_start_time + audio_end_time) / 2.0 + 0.5))  #1 frame extracted per second
-        frame_index = int(round(((audio_start_time + audio_end_time) / 2.0 + 0.05) * 10))  #10 frames extracted per second
+        frame_index = int(round((audio_start_time + audio_end_time) / 2.0 + 0.5))  #1 frame extracted per second
+        #frame_index = int(round(((audio_start_time + audio_end_time) / 2.0 + 0.05) * 10))  #10 frames extracted per second
         frame = process_image(Image.open(os.path.join(frame_path, str(frame_index).zfill(6) + '.png')).convert('RGB'), self.opt.enable_data_augmentation)
         frame = self.vision_transform(frame)
 
@@ -102,3 +103,6 @@ class AudioVisualDataset(BaseDataset):
 
     def name(self):
         return 'AudioVisualDataset'
+
+
+

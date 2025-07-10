@@ -60,7 +60,7 @@ dependencies:
   - pydantic-core=2.27.1
   - pygments=2.19.1
   - pysocks=1.7.1
-  - python=3.9.18
+  - python=3.9
   - readline=8.2
   - reproc=14.2.4
   - reproc-cpp=14.2.4

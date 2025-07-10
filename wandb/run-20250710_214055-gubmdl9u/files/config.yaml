@@ -1,0 +1,162 @@
+_wandb:
+    value:
+        cli_version: 0.21.0
+        e:
+            s9eyy5kcvwd10b0b60dpwtbnr4q71nop:
+                args:
+                    - --hdf5FolderPath
+                    - /scratch/yc01847/FAIR-Play/splits/split1
+                    - --name
+                    - mono2binaural
+                    - --model
+                    - audioVisual
+                    - --checkpoints_dir
+                    - /scratch/yc01847/2.5D-Visual-Sound/checkpoints
+                    - --save_epoch_freq
+                    - "10"
+                    - --save_latest_freq
+                    - "5"
+                    - --display_freq
+                    - "2"
+                    - --batchSize
+                    - "64"
+                    - --learning_rate_decrease_itr
+                    - "10"
+                    - --niter
+                    - "10"
+                    - --lr_visual
+                    - "0.0001"
+                    - --lr_audio
+                    - "0.001"
+                    - --nThreads
+                    - "0"
+                    - --gpu_ids
+                    - "0"
+                    - --validation_on
+                    - --validation_freq
+                    - "5"
+                    - --validation_batches
+                    - "2"
+                    - --name
+                    - trial1
+                codePath: train.py
+                codePathLocal: train.py
+                cpu_count: 24
+                cpu_count_logical: 32
+                cudaVersion: "12.4"
+                disk:
+                    /:
+                        total: "263086084096"
+                        used: "140423827456"
+                email: v41827@gmail.com
+                executable: /scratch/yc01847/miniconda3/envs/visual-sound/bin/python
+                git:
+                    commit: a5be95012aceed5504d3772d1ea977f946728880
+                    remote: https://github.com/v41827/2.5D-Visual-Sound.git
+                gpu: NVIDIA RTX A4000
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 6144
+                      memoryTotal: "17171480576"
+                      name: NVIDIA RTX A4000
+                      uuid: GPU-111e1d1d-8e66-c7e7-d71b-d388ca433e4a
+                host: otter31.eps.surrey.ac.uk
+                memory:
+                    total: "67093270528"
+                os: Linux-5.15.0-113-generic-x86_64-with-glibc2.35
+                program: /scratch/yc01847/2.5D-Visual-Sound/train.py
+                python: CPython 3.9.18
+                root: /scratch/yc01847/2.5D-Visual-Sound
+                startedAt: "2025-07-10T20:40:55.029549Z"
+                writerId: s9eyy5kcvwd10b0b60dpwtbnr4q71nop
+        m: []
+        python_version: 3.9.18
+        t:
+            "1":
+                - 1
+                - 41
+            "2":
+                - 1
+                - 41
+                - 53
+            "3":
+                - 13
+                - 16
+            "4": 3.9.18
+            "5": 0.21.0
+            "12": 0.21.0
+            "13": linux-x86_64
+audio_length:
+    value: 0.63
+audio_sampling_rate:
+    value: 16000
+batchSize:
+    value: 64
+beta1:
+    value: 0.9
+checkpoints_dir:
+    value: /scratch/yc01847/2.5D-Visual-Sound/checkpoints
+decay_factor:
+    value: 0.94
+display_freq:
+    value: 2
+enable_data_augmentation:
+    value: true
+gpu_ids:
+    value:
+        - 0
+hdf5FolderPath:
+    value: /scratch/yc01847/FAIR-Play/splits/split1
+isTrain:
+    value: true
+learning_rate_decrease_itr:
+    value: 10
+lr_audio:
+    value: 0.001
+lr_visual:
+    value: 0.0001
+measure_time:
+    value: false
+mode:
+    value: train
+model:
+    value: audioVisual
+nThreads:
+    value: 0
+name:
+    value: trial1
+niter:
+    value: 10
+optimizer:
+    value: adam
+run_name:
+    value: default_run
+save_epoch_freq:
+    value: 10
+save_latest_freq:
+    value: 5
+tensorboard:
+    value: false
+unet_input_nc:
+    value: 2
+unet_ngf:
+    value: 64
+unet_output_nc:
+    value: 2
+validation_batches:
+    value: 2
+validation_freq:
+    value: 5
+validation_on:
+    value: true
+wandb:
+    value: true
+wandb_project:
+    value: 2.5D-Visual-Sound
+weight_decay:
+    value: 0.0005
+weights_audio:
+    value: ""
+weights_visual:
+    value: ""

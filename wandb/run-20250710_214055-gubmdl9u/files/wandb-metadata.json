@@ -1,0 +1,77 @@
+{
+  "os":  "Linux-5.15.0-113-generic-x86_64-with-glibc2.35",
+  "python":  "CPython 3.9.18",
+  "startedAt":  "2025-07-10T20:40:55.029549Z",
+  "args":  [
+    "--hdf5FolderPath",
+    "/scratch/yc01847/FAIR-Play/splits/split1",
+    "--name",
+    "mono2binaural",
+    "--model",
+    "audioVisual",
+    "--checkpoints_dir",
+    "/scratch/yc01847/2.5D-Visual-Sound/checkpoints",
+    "--save_epoch_freq",
+    "10",
+    "--save_latest_freq",
+    "5",
+    "--display_freq",
+    "2",
+    "--batchSize",
+    "64",
+    "--learning_rate_decrease_itr",
+    "10",
+    "--niter",
+    "10",
+    "--lr_visual",
+    "0.0001",
+    "--lr_audio",
+    "0.001",
+    "--nThreads",
+    "0",
+    "--gpu_ids",
+    "0",
+    "--validation_on",
+    "--validation_freq",
+    "5",
+    "--validation_batches",
+    "2",
+    "--name",
+    "trial1"
+  ],
+  "program":  "/scratch/yc01847/2.5D-Visual-Sound/train.py",
+  "codePath":  "train.py",
+  "codePathLocal":  "train.py",
+  "git":  {
+    "remote":  "https://github.com/v41827/2.5D-Visual-Sound.git",
+    "commit":  "a5be95012aceed5504d3772d1ea977f946728880"
+  },
+  "email":  "v41827@gmail.com",
+  "root":  "/scratch/yc01847/2.5D-Visual-Sound",
+  "host":  "otter31.eps.surrey.ac.uk",
+  "executable":  "/scratch/yc01847/miniconda3/envs/visual-sound/bin/python",
+  "cpu_count":  24,
+  "cpu_count_logical":  32,
+  "gpu":  "NVIDIA RTX A4000",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "263086084096",
+      "used":  "140423827456"
+    }
+  },
+  "memory":  {
+    "total":  "67093270528"
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA RTX A4000",
+      "memoryTotal":  "17171480576",
+      "cudaCores":  6144,
+      "architecture":  "Ampere",
+      "uuid":  "GPU-111e1d1d-8e66-c7e7-d71b-d388ca433e4a"
+    }
+  ],
+  "cudaVersion":  "12.4",
+  "writerId":  "s9eyy5kcvwd10b0b60dpwtbnr4q71nop"
+}

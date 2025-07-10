@@ -14,7 +14,8 @@ from data.data_loader import CreateDataLoader
 from models.models import ModelBuilder
 from models.audioVisual_model import AudioVisualModel
 from torch.autograd import Variable
-#from tensorboardX import SummaryWriter
+import wandb
+
 
 def create_optimizer(nets, opt):
     (net_visual, net_audio) = nets
@@ -49,6 +50,8 @@ def display_val(model, loss_criterion, writer, index, dataset_val, opt):
 def main():
     #parse arguments
     opt = TrainOptions().parse()
+    if opt.wandb:
+        wandb.init(project=opt.wandb_project, config=vars(opt)) #Track all training hyperparameters from my opt object
     opt.device = torch.device("cuda")
 
     #construct data loader
@@ -67,11 +70,9 @@ def main():
         print('#validation clips = %d' % dataset_size_val)
         opt.mode = 'train' #set it back
 
-    # if opt.tensorboard:
-    #     from tensorboardX import SummaryWriter
-    #     writer = SummaryWriter(comment=opt.name)
     else:
         writer = None
+    writer = None
 
     # network builders
     builder = ModelBuilder()
@@ -147,6 +148,7 @@ def main():
                             batch_loss = []
                             # if opt.tensorboard:
                             #     writer.add_scalar('data/loss', avg_loss, total_steps)
+                            wandb.log({"train/loss": avg_loss, "steps": total_steps})
                             if(opt.measure_time):
                                     print('average data loading time: ' + str(sum(data_loading_time)/len(data_loading_time)))
                                     print('average forward time: ' + str(sum(model_forward_time)/len(model_forward_time)))
@@ -166,6 +168,7 @@ def main():
                             opt.mode = 'val'
                             print('Display validation results at (epoch %d, total_steps %d)' % (epoch, total_steps))
                             val_err = display_val(model, loss_criterion, writer, total_steps, dataset_val, opt)
+                            wandb.log({"val/loss": val_err, "steps": total_steps})
                             print('end of display \n')
                             model.train()
                             opt.mode = 'train'
@@ -188,6 +191,9 @@ def main():
             if(opt.learning_rate_decrease_itr > 0 and epoch % opt.learning_rate_decrease_itr == 0):
                 decrease_learning_rate(optimizer, opt.decay_factor)
                 print('decreased learning rate by ', opt.decay_factor)
+                # Log updated learning rates to wandb
+                for i, param_group in enumerate(optimizer.param_groups):
+                    wandb.log({f"lr/group_{i}": param_group['lr'], "epoch": epoch})
 
 if __name__ == '__main__':
     main()
