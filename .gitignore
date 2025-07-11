@@ -5,3 +5,5 @@ __pycache__/
 # Ignore logs and checkpoints
 *.log
 checkpoints/
+
+wandb/
