@@ -13,10 +13,10 @@ python train.py \
   --display_freq 10 \
   --batchSize 64 \
   --learning_rate_decrease_itr 10 \
-  --niter 1000 \
+  --niter 500 \
   --lr_visual 0.0001 \
   --lr_audio 0.001 \
-  --nThreads 24 \
+  --nThreads 12 \
   --gpu_ids 0 \
   --validation_on \
   --validation_freq 100 \
