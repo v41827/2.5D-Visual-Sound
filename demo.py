@@ -9,6 +9,7 @@
 import os
 import argparse
 import librosa
+import soundfile as sf
 import numpy as np
 from PIL import Image
 import subprocess
@@ -73,7 +74,7 @@ def main():
 		data['audio_diff_spec'] = torch.FloatTensor(generate_spectrogram(audio_segment_channel1 - audio_segment_channel2)).unsqueeze(0) #unsqueeze to add a batch dimension
 		data['audio_mix_spec'] = torch.FloatTensor(generate_spectrogram(audio_segment_channel1 + audio_segment_channel2)).unsqueeze(0) #unsqueeze to add a batch dimension
 		#get the frame index for current window
-		frame_index = int(round((((sliding_window_start + samples_per_window / 2.0) / audio.shape[-1]) * opt.input_audio_length + 0.05) * 10 ))
+		frame_index = int(round((((sliding_window_start + samples_per_window / 2.0) / audio.shape[-1]) * opt.input_audio_length + 0.05) ) +1)
 		image = Image.open(os.path.join(opt.video_frame_path, str(frame_index).zfill(6) + '.png')).convert('RGB')
 		#image = image.transpose(Image.FLIP_LEFT_RIGHT)
 		frame = vision_transform(image).unsqueeze(0) #unsqueeze to add a batch dimension
@@ -100,7 +101,11 @@ def main():
 	data['audio_diff_spec'] = torch.FloatTensor(generate_spectrogram(audio_segment_channel1 - audio_segment_channel2)).unsqueeze(0) #unsqueeze to add a batch dimension
 	data['audio_mix_spec'] = torch.FloatTensor(generate_spectrogram(audio_segment_channel1 + audio_segment_channel2)).unsqueeze(0) #unsqueeze to add a batch dimension
 	#get the frame index for last window
-	frame_index = int(round(((opt.input_audio_length - opt.audio_length / 2.0) + 0.05) * 10))
+	frame_index = int(round(((opt.input_audio_length - opt.audio_length / 2.0) + 0.05) ) +1)
+	num_of_sampled_frames = len(os.listdir(opt.video_frame_path))
+	# if frame_index > num_of_sampled_frames:
+	# 	frame_index = num_of_sampled_frames - 1
+	# print ("frame_idx:",frame_index, flush=True)
 	image = Image.open(os.path.join(opt.video_frame_path, str(frame_index).zfill(6) + '.png')).convert('RGB')
 	#image = image.transpose(Image.FLIP_LEFT_RIGHT)
 	frame = vision_transform(image).unsqueeze(0) #unsqueeze to add a batch dimension
@@ -126,9 +131,12 @@ def main():
 		os.mkdir(opt.output_dir_root)
 
 	mixed_mono = (audio_channel1 + audio_channel2) / 2
-	librosa.output.write_wav(os.path.join(opt.output_dir_root, 'predicted_binaural.wav'), predicted_binaural_audio, opt.audio_sampling_rate)
-	librosa.output.write_wav(os.path.join(opt.output_dir_root, 'mixed_mono.wav'), mixed_mono, opt.audio_sampling_rate)
-	librosa.output.write_wav(os.path.join(opt.output_dir_root, 'input_binaural.wav'), audio, opt.audio_sampling_rate)
+	# librosa.output.write_wav(os.path.join(opt.output_dir_root, 'predicted_binaural.wav'), predicted_binaural_audio, opt.audio_sampling_rate)
+	# librosa.output.write_wav(os.path.join(opt.output_dir_root, 'mixed_mono.wav'), mixed_mono, opt.audio_sampling_rate)
+	# librosa.output.write_wav(os.path.join(opt.output_dir_root, 'input_binaural.wav'), audio, opt.audio_sampling_rate)
+	sf.write(os.path.join(opt.output_dir_root, 'predicted_binaural.wav'), predicted_binaural_audio.T, opt.audio_sampling_rate)
+	sf.write(os.path.join(opt.output_dir_root, 'mixed_mono.wav'), mixed_mono, opt.audio_sampling_rate)
+	sf.write(os.path.join(opt.output_dir_root, 'input_binaural.wav'), audio.T, opt.audio_sampling_rate)
 
 if __name__ == '__main__':
     main()

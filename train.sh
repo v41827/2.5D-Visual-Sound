@@ -4,7 +4,7 @@ conda activate visual-sound
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python train.py \
-  --hdf5FolderPath /scratch/yc01847/FAIR-Play/splits/split1 \
+  --hdf5FolderPath /scratch/yc01847/FAIR-Play/splits/split3 \
   --name mono2binaural \
   --model audioVisual \
   --checkpoints_dir /scratch/yc01847/2.5D-Visual-Sound/checkpoints \

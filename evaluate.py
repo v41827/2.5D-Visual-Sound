@@ -76,7 +76,7 @@ def main():
 	index = 1
 	for audio_name in audioNames:
 		if index % 10 == 0:
-			print "Evaluating testing example " + str(index) + " :", audio_name
+			print ("Evaluating testing example " + str(index) + " :", audio_name)
 		#check whether input binaural is mono, replicate to two channels if it's mono
 		if args.real_mono:
 			mono_sound, audio_rate = librosa.load(os.path.join(args.results_root, audio_name, 'mixed_mono.wav'), sr=args.audio_sampling_rate)
@@ -97,8 +97,8 @@ def main():
 		index = index + 1
 
 	#print the results
-	print "STFT L2 Distance: ", stat.mean(stft_distance_list), stat.stdev(stft_distance_list), stat.stdev(stft_distance_list) / np.sqrt(len(stft_distance_list))
-	print "Average Envelope Distance: ", stat.mean(envelope_distance_list), stat.stdev(envelope_distance_list), stat.stdev(envelope_distance_list) / np.sqrt(len(envelope_distance_list))
+	print ("STFT L2 Distance: ", stat.mean(stft_distance_list), stat.stdev(stft_distance_list), stat.stdev(stft_distance_list) / np.sqrt(len(stft_distance_list)))
+	print ("Average Envelope Distance: ", stat.mean(envelope_distance_list), stat.stdev(envelope_distance_list), stat.stdev(envelope_distance_list) / np.sqrt(len(envelope_distance_list)))
 
 if __name__ == '__main__':
 	main()

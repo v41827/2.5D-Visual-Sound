@@ -14,7 +14,7 @@ import torch.nn.functional as F
 from . import networks,criterion
 from torch.autograd import Variable
 
-class AudioVisualModel(torch.nn.Module):
+class AudioVisualModel(torch.nn.Module): # defines the audio-visual model for training, inherits from torch.nn.Module
     def name(self):
         return 'AudioVisualModel'
 
