@@ -7,7 +7,7 @@ python train.py \
   --hdf5FolderPath /scratch/yc01847/FAIR-Play/splits/split3 \
   --name mono2binaural \
   --model audioVisual \
-  --checkpoints_dir /scratch/yc01847/2.5D-Visual-Sound/checkpoints \
+  --checkpoints_dir /scratch/yc01847/2.5D-Visual-Sound/checkpoints/split3 \
   --save_epoch_freq 50 \
   --save_latest_freq 100 \
   --display_freq 10 \
@@ -16,10 +16,8 @@ python train.py \
   --niter 500 \
   --lr_visual 0.0001 \
   --lr_audio 0.001 \
-  --nThreads 12 \
+  --nThreads 6 \
   --gpu_ids 0 \
   --validation_on \
   --validation_freq 100 \
-  --validation_batches 50 \
-
-  |& tee -a mono2binaural.log
+  --validation_batches 50 |& tee -a mono2binaural.log

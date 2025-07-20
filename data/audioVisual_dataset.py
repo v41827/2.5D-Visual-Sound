@@ -54,7 +54,13 @@ class AudioVisualDataset(BaseDataset):
         self.audios = []
 
         #load hdf5 file here
+        if opt.hdf5FolderPath is None:
+            raise ValueError("--hdf5FolderPath is required but not provided. Please specify the path to the folder containing train.h5, val.h5 and test.h5 files.")
+        
         h5f_path = os.path.join(opt.hdf5FolderPath, opt.mode+".h5")
+        if not os.path.exists(h5f_path):
+            raise FileNotFoundError(f"HDF5 file not found: {h5f_path}. Please check if the file exists and the path is correct.")
+        
         h5f = h5py.File(h5f_path, 'r')
         #self.audios = h5f['audio'][:] 
         self.audios = [p.decode() for p in h5f['audio'][:]]

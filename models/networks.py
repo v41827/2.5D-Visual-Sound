@@ -12,14 +12,14 @@ import torch.nn.functional as F
 import functools
 """
 This script has the network architectures used in the Audio-Visual model.
-
+code flow: 
 """
 
 def unet_conv(input_nc, output_nc, norm_layer=nn.BatchNorm2d):
     downconv = nn.Conv2d(input_nc, output_nc, kernel_size=4, stride=2, padding=1)
     downrelu = nn.LeakyReLU(0.2, True)
     downnorm = norm_layer(output_nc)
-    return nn.Sequential(*[downconv, downnorm, downrelu])
+    return nn.Sequential(*[downconv, downnorm, downrelu]) #equivalent to nn.Sequential(downconv, downnorm, downrelu) 
 
 def unet_upconv(input_nc, output_nc, outermost=False, norm_layer=nn.BatchNorm2d):
     upconv = nn.ConvTranspose2d(input_nc, output_nc, kernel_size=4, stride=2, padding=1)
@@ -49,13 +49,13 @@ def weights_init(m):
         m.weight.data.normal_(0.0, 0.02)
 
 class VisualNet(nn.Module):
-    def __init__(self, original_resnet):
+    def __init__(self, original_resnet): #Inherits from nn.Module, and takes a pre-trained ResNet model (see paper for more details).
         super(VisualNet, self).__init__()
-        layers = list(original_resnet.children())[0:-2]
+        layers = list(original_resnet.children())[0:-2] # Uses all layers except the last two (avgpool and fc)
         self.feature_extraction = nn.Sequential(*layers) #features before conv1x1
 
     def forward(self, x):
-        x = self.feature_extraction(x)
+        x = self.feature_extraction(x) # Passes input through ResNet backbone to extract visual features
         return x
 
 class AudioNet(nn.Module):

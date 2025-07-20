@@ -50,6 +50,11 @@ def display_val(model, loss_criterion, writer, index, dataset_val, opt):
 def main():
     #parse arguments
     opt = TrainOptions().parse()
+    
+    # Debug: Print the hdf5FolderPath to see what's being passed
+    print(f"DEBUG: hdf5FolderPath = {opt.hdf5FolderPath}")
+    print(f"DEBUG: type of hdf5FolderPath = {type(opt.hdf5FolderPath)}")
+    
     if opt.wandb:
         wandb.init(project=opt.wandb_project, config=vars(opt)) #Track all training hyperparameters from my opt object
     opt.device = torch.device("cuda")
@@ -85,11 +90,11 @@ def main():
     nets = (net_visual, net_audio)
 
     # construct our audio-visual model
-    model = AudioVisualModel(nets, opt)
+    model = AudioVisualModel(nets, opt) #前一行的nets pass進來這裡
     model = torch.nn.DataParallel(model, device_ids=opt.gpu_ids)
     model.to(opt.device)
 
-    # set up optimizer
+    # set up optimizer 
     optimizer = create_optimizer(nets, opt)
 
     # set up loss function
@@ -120,7 +125,7 @@ def main():
 
                     # forward pass
                     model.zero_grad()
-                    output = model.forward(data)
+                    output = model(data) # forward pass through the model
 
                     # compute loss
                     loss = loss_criterion(output['binaural_spectrogram'], Variable(output['audio_gt'], requires_grad=False))
