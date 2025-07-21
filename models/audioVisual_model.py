@@ -22,7 +22,7 @@ class AudioVisualModel(torch.nn.Module): # defines the audio-visual model for tr
         super(AudioVisualModel, self).__init__()
         self.opt = opt
         #initialize model
-        self.net_visual, self.net_audio = nets
+        self.net_visual, self.net_audio = nets #Unpacks nets (a tuple of 2 networks) into self.net_visual (instance of VisualNet) and self.net_audio (instance of AudioNet)
 
     def forward(self, input, volatile=False):
         visual_input = input['frame']

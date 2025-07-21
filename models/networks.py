@@ -85,6 +85,7 @@ class AudioNet(nn.Module):
         visual_feat = visual_feat.view(visual_feat.shape[0], -1, 1, 1) #flatten visual feature
         visual_feat = visual_feat.repeat(1, 1, audio_conv5feature.shape[-2], audio_conv5feature.shape[-1]) #tile visual feature
         
+    
         audioVisual_feature = torch.cat((visual_feat, audio_conv5feature), dim=1)
         
         audio_upconv1feature = self.audionet_upconvlayer1(audioVisual_feature)
