@@ -58,6 +58,15 @@ class VisualNet(nn.Module):
         x = self.feature_extraction(x) # Passes input through ResNet backbone to extract visual features
         return x
 
+class TextNet(nn.Module): #place holder for text features
+    def __init__(self, input_dim=512, output_dim=512):
+        super(TextNet, self).__init__()
+        self.fc = nn.Linear(input_dim, output_dim)
+
+    def forward(self, x):
+        x = self.fc(x)
+        return x
+
 class AudioNet(nn.Module):
     def __init__(self, ngf=64, input_nc=2, output_nc=2):
         super(AudioNet, self).__init__()

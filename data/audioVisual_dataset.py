@@ -14,11 +14,12 @@ import h5py
 import random
 import math
 import numpy as np
+import csv
 import glob
 import torch
 from PIL import Image, ImageEnhance
 import torchvision.transforms as transforms
-from data.base_dataset import BaseDataset
+from base_dataset import BaseDataset
 
 def normalize(samples, desired_rms = 0.1, eps = 1e-4):
   rms = np.maximum(eps, np.sqrt(np.mean(samples**2)))
@@ -72,7 +73,7 @@ class AudioVisualDataset(BaseDataset):
         vision_transform_list = [transforms.ToTensor(), normalize]
         self.vision_transform = transforms.Compose(vision_transform_list)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index, text_folder_name):
         #load audio
         audio, audio_rate = librosa.load(self.audios[index], sr=self.opt.audio_sampling_rate, mono=False)
         #audio = self.audios[index]  # its already waveform
@@ -94,21 +95,71 @@ class AudioVisualDataset(BaseDataset):
 
         # get the closest frame to the audio segment
         frame_index = int(round((audio_start_time + audio_end_time) / 2.0 + 0.5))  #1 frame extracted per second
+        print(f"[DEBUG] Sample {index}: selected frame_index = {frame_index}")
         #frame_index = int(round(((audio_start_time + audio_end_time) / 2.0 + 0.05) * 10))  #10 frames extracted per second
-        frame = process_image(Image.open(os.path.join(frame_path, str(frame_index).zfill(6) + '.png')).convert('RGB'), self.opt.enable_data_augmentation)
+        frame = process_image(Image.open(os.path.join(frame_path, str(frame_index + 1).zfill(6) + '.png')).convert('RGB'), self.opt.enable_data_augmentation)
         frame = self.vision_transform(frame)
+        text_path_parts = self.audios[index].strip().split('/')
+        text_path_parts[-1] = text_path_parts[-1][:-4] + '.csv'
+        text_path_parts[-2] = text_folder_name #text_folder_name (str) is the folder name under FAIR-Play
+        text_path = '/'.join(text_path_parts)
+        with open(text_path, 'r') as f:
+            read_corresponding_text = csv.reader(f)
+            read_corresponding_text = list(read_corresponding_text)  # Convert the CSV reader to a list
+            if len(read_corresponding_text) <= frame_index + 1:
+                raise IndexError(f"Frame index {frame_index + 1} exceeds the number of rows in the text file {text_path}.")
+            if len(read_corresponding_text) == 0:
+                raise ValueError(f"The text file {text_path} is empty.")
+            text = read_corresponding_text[frame_index] # read the text corresponding to the frame index
+            print(f"[DEBUG] Sample {index}: text = {text}")
 
         #passing the spectrogram of the difference
         audio_diff_spec = torch.FloatTensor(generate_spectrogram(audio_channel1 - audio_channel2))
         audio_mix_spec = torch.FloatTensor(generate_spectrogram(audio_channel1 + audio_channel2))
 
-        return {'frame': frame, 'audio_diff_spec':audio_diff_spec, 'audio_mix_spec':audio_mix_spec}
+        return {'frame': frame,"text": text, 'audio_diff_spec':audio_diff_spec, 'audio_mix_spec':audio_mix_spec}
 
     def __len__(self):
         return len(self.audios)
 
     def name(self):
         return 'AudioVisualDataset'
+
+
+if __name__ == '__main__': #test script
+    from base_dataset import BaseDataset
+    from audioVisual_dataset import AudioVisualDataset
+    import types
+    import numpy as np
+    import torch
+    import os
+    class DummyOpt:
+        hdf5FolderPath = '/scratch/yc01847/FAIR-Play/splits/split1'  # <-- Change this to your test path
+        model = 'audioVisual'
+        batchSize = 1
+        nThreads = 1
+        audio_sampling_rate = 16000
+        audio_length = 0.63
+        enable_data_augmentation = False
+        mode = 'train'
+        isTrain = True
+        gpu_ids = []
+        name = 'test'
+        checkpoints_dir = 'checkpoints/'
+    opt = DummyOpt()
+    dataset = AudioVisualDataset()
+    dataset.initialize(opt)
+    # Use a dummy text folder name for testing
+    text_folder_name = 'sampled_output_step10'  # <-- Change this as needed
+    print('Dataset length:', len(dataset))
+    for i in range(min(3, len(dataset))):
+        sample = dataset.__getitem__(i, text_folder_name)
+        print(f'Sample {i}:')
+        for k, v in sample.items():
+            if isinstance(v, torch.Tensor):
+                print(f'  {k}: Tensor, shape={v.shape}')
+            else:
+                print(f'  {k}: {v}')
 
 
 
