@@ -19,7 +19,7 @@ import glob
 import torch
 from PIL import Image, ImageEnhance
 import torchvision.transforms as transforms
-from base_dataset import BaseDataset
+from .base_dataset import BaseDataset
 
 def normalize(samples, desired_rms = 0.1, eps = 1e-4):
   rms = np.maximum(eps, np.sqrt(np.mean(samples**2)))
@@ -63,6 +63,9 @@ class AudioVisualDataset(BaseDataset):
             raise FileNotFoundError(f"HDF5 file not found: {h5f_path}. Please check if the file exists and the path is correct.")
         
         h5f = h5py.File(h5f_path, 'r')
+
+        self.text_folder_name = opt.text_folder_name
+
         #self.audios = h5f['audio'][:] 
         self.audios = [p.decode() for p in h5f['audio'][:]]
 
@@ -73,7 +76,7 @@ class AudioVisualDataset(BaseDataset):
         vision_transform_list = [transforms.ToTensor(), normalize]
         self.vision_transform = transforms.Compose(vision_transform_list)
 
-    def __getitem__(self, index, text_folder_name):
+    def __getitem__(self, index):
         #load audio
         audio, audio_rate = librosa.load(self.audios[index], sr=self.opt.audio_sampling_rate, mono=False)
         #audio = self.audios[index]  # its already waveform
@@ -95,13 +98,12 @@ class AudioVisualDataset(BaseDataset):
 
         # get the closest frame to the audio segment
         frame_index = int(round((audio_start_time + audio_end_time) / 2.0 + 0.5))  #1 frame extracted per second
-        print(f"[DEBUG] Sample {index}: selected frame_index = {frame_index}")
         #frame_index = int(round(((audio_start_time + audio_end_time) / 2.0 + 0.05) * 10))  #10 frames extracted per second
         frame = process_image(Image.open(os.path.join(frame_path, str(frame_index + 1).zfill(6) + '.png')).convert('RGB'), self.opt.enable_data_augmentation)
         frame = self.vision_transform(frame)
         text_path_parts = self.audios[index].strip().split('/')
         text_path_parts[-1] = text_path_parts[-1][:-4] + '.csv'
-        text_path_parts[-2] = text_folder_name #text_folder_name (str) is the folder name under FAIR-Play
+        text_path_parts[-2] = self.text_folder_name #text_folder_name (str) is the folder name under FAIR-Play
         text_path = '/'.join(text_path_parts)
         with open(text_path, 'r') as f:
             read_corresponding_text = csv.reader(f)
@@ -111,7 +113,9 @@ class AudioVisualDataset(BaseDataset):
             if len(read_corresponding_text) == 0:
                 raise ValueError(f"The text file {text_path} is empty.")
             text = read_corresponding_text[frame_index] # read the text corresponding to the frame index
-            print(f"[DEBUG] Sample {index}: text = {text}")
+            if isinstance(text, list):
+                text = " ".join(text)    # Convert list to string (CLAP tokenizer only accepts string), and will finally convert to dict in train loop
+            print(f"[DEBUG] Sample {index}: selected frame_index = {frame_index}, text = {text}")
 
         #passing the spectrogram of the difference
         audio_diff_spec = torch.FloatTensor(generate_spectrogram(audio_channel1 - audio_channel2))

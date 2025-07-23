@@ -8,6 +8,9 @@
 
 import torch.utils.data
 from data.base_data_loader import BaseDataLoader
+from transformers import ClapProcessor
+
+processor = ClapProcessor.from_pretrained("laion/clap-htsat-unfused")
 
 def CreateDataset(opt):
     dataset = None
@@ -21,6 +24,17 @@ def CreateDataset(opt):
     dataset.initialize(opt)
     return dataset
 
+def custom_collate_fn(batch):
+    batch_texts = [item['text'] for item in batch]
+    text_inputs = processor(text=batch_texts, return_tensors="pt", padding=True, truncation=True) # Process text inputs
+    text_inputs = {key: value.to(batch[0]['frame'].device) for key, value in text_inputs.items()}
+    return {
+        'frame': torch.stack([item['frame'] for item in batch]),
+        'text': text_inputs,
+        'audio_diff_spec': torch.stack([item['audio_diff_spec'] for item in batch]),
+        'audio_mix_spec': torch.stack([item['audio_mix_spec'] for item in batch])
+    }
+
 class CustomDatasetDataLoader(BaseDataLoader):
     def name(self):
         return 'CustomDatasetDataLoader'
@@ -32,7 +46,8 @@ class CustomDatasetDataLoader(BaseDataLoader):
             self.dataset,
             batch_size=opt.batchSize,
             shuffle=True,
-            num_workers=int(opt.nThreads))
+            num_workers=int(opt.nThreads),
+            collate_fn=custom_collate_fn)
 
     def load_data(self):
         return self

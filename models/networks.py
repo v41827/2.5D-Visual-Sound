@@ -58,14 +58,14 @@ class VisualNet(nn.Module):
         x = self.feature_extraction(x) # Passes input through ResNet backbone to extract visual features
         return x
 
-class TextNet(nn.Module): #place holder for text features
-    def __init__(self, input_dim=512, output_dim=512):
+class TextNet(nn.Module):
+    def __init__(self, clap_model):
         super(TextNet, self).__init__()
-        self.fc = nn.Linear(input_dim, output_dim)
-
+        self.clap = clap_model  # pre-trained CLAP model
+    
     def forward(self, x):
-        x = self.fc(x)
-        return x
+        # x: text input (tokenized, etc.)
+        return self.clap.get_text_features(**x) #(**x) 是對的，因為 Hugging Face CLAP 的輸入是一個 dictionary
 
 class AudioNet(nn.Module):
     def __init__(self, ngf=64, input_nc=2, output_nc=2):
@@ -76,14 +76,14 @@ class AudioNet(nn.Module):
         self.audionet_convlayer3 = unet_conv(ngf * 2, ngf * 4)
         self.audionet_convlayer4 = unet_conv(ngf * 4, ngf * 8)
         self.audionet_convlayer5 = unet_conv(ngf * 8, ngf * 8)
-        self.audionet_upconvlayer1 = unet_upconv(1296, ngf * 8) #1296 (audio-visual feature) = 784 (visual feature) + 512 (audio feature)
+        self.audionet_upconvlayer1 = unet_upconv(1808, ngf * 8) #1808 (audio-visual feature) = 784 (visual feature) + 512 (audio feature)
         self.audionet_upconvlayer2 = unet_upconv(ngf * 16, ngf *4)
         self.audionet_upconvlayer3 = unet_upconv(ngf * 8, ngf * 2)
         self.audionet_upconvlayer4 = unet_upconv(ngf * 4, ngf)
         self.audionet_upconvlayer5 = unet_upconv(ngf * 2, output_nc, True) #outermost layer use a sigmoid to bound the mask
         self.conv1x1 = create_conv(512, 8, 1, 0) #reduce dimension of extracted visual features
 
-    def forward(self, x, visual_feat):
+    def forward(self, x, visual_feat, text_feat):
         audio_conv1feature = self.audionet_convlayer1(x)
         audio_conv2feature = self.audionet_convlayer2(audio_conv1feature)
         audio_conv3feature = self.audionet_convlayer3(audio_conv2feature)
@@ -94,12 +94,50 @@ class AudioNet(nn.Module):
         visual_feat = visual_feat.view(visual_feat.shape[0], -1, 1, 1) #flatten visual feature
         visual_feat = visual_feat.repeat(1, 1, audio_conv5feature.shape[-2], audio_conv5feature.shape[-1]) #tile visual feature
         
-    
-        audioVisual_feature = torch.cat((visual_feat, audio_conv5feature), dim=1)
-        
+        # text_feat: shape (B, 512) — you must pass this in as an extra input
+        text_feat = text_feat.view(text_feat.shape[0], text_feat.shape[1], 1, 1)  # shape: (B, 512, 1, 1)
+        text_feat = text_feat.repeat(1, 1, audio_conv5feature.shape[2], audio_conv5feature.shape[3])  # shape: (B, 512, H, W)
+
+        audioVisual_feature = torch.cat((visual_feat, audio_conv5feature, text_feat), dim=1)
+
         audio_upconv1feature = self.audionet_upconvlayer1(audioVisual_feature)
         audio_upconv2feature = self.audionet_upconvlayer2(torch.cat((audio_upconv1feature, audio_conv4feature), dim=1))
         audio_upconv3feature = self.audionet_upconvlayer3(torch.cat((audio_upconv2feature, audio_conv3feature), dim=1))
         audio_upconv4feature = self.audionet_upconvlayer4(torch.cat((audio_upconv3feature, audio_conv2feature), dim=1))
         mask_prediction = self.audionet_upconvlayer5(torch.cat((audio_upconv4feature, audio_conv1feature), dim=1)) * 2 - 1
         return mask_prediction
+
+
+if __name__ == "__main__":
+    import torchvision
+    from transformers import ClapProcessor, ClapModel
+
+    # 測試 VisualNet
+    resnet = torchvision.models.resnet18(pretrained=False)
+    visual_net = VisualNet(resnet)
+    dummy_img = torch.randn(2, 3, 224, 448)  # batch=2, 3 channels, 224x448
+    visual_feat = visual_net(dummy_img)
+    print("VisualNet output shape:", visual_feat.shape)
+
+    # 測試 TextNet
+    class DummyCLAP:
+        def get_text_features(self, **x):
+            # 假設 batch size = 2, embedding dim = 512
+            return torch.randn(2, 512)
+    clap = DummyCLAP()
+    text_net = TextNet(clap)
+    dummy_text = {}  # 你可以根據 CLAP 實際需求填入
+    text_feat = text_net(dummy_text)
+    print("TextNet output shape:", text_feat.shape)
+
+    # 測試 AudioNet
+    audio_net = AudioNet()
+    dummy_audio = torch.randn(2, 2, 256, 256)  # batch=2, 2 channels, 256x256
+    # 先把 visual_feat 處理成 AudioNet 需要的 shape
+    visual_feat = torch.randn(2, 512, 7, 14)  # 假設這是 ResNet 輸出
+    # 假設 text_feat 來自 CLAP
+    text_feat = torch.randn(2, 512)
+    # 你需要修改 AudioNet 的 forward 來接受 text_feat
+    # 這裡假設你已經改好了
+    mask_pred = audio_net(dummy_audio, visual_feat, text_feat)
+    print("AudioNet output shape:", mask_pred.shape)

@@ -18,9 +18,10 @@ import wandb
 
 
 def create_optimizer(nets, opt):
-    (net_visual, net_audio) = nets
+    (net_visual, net_audio, net_text) = nets
     param_groups = [{'params': net_visual.parameters(), 'lr': opt.lr_visual},
-                    {'params': net_audio.parameters(), 'lr': opt.lr_audio}]
+                    {'params': net_audio.parameters(), 'lr': opt.lr_audio},]
+
     if opt.optimizer == 'sgd':
         return torch.optim.SGD(param_groups, momentum=opt.beta1, weight_decay=opt.weight_decay)
     elif opt.optimizer == 'adam':
@@ -42,9 +43,6 @@ def display_val(model, loss_criterion, writer, index, dataset_val, opt):
             else:
                 break
     avg_loss = sum(losses)/len(losses)
-    # if opt.tensorboard:
-    #     writer.add_scalar('data/val_loss', avg_loss, index)
-    # print('val loss: %.3f' % avg_loss)
     return avg_loss 
 
 def main():
@@ -87,7 +85,11 @@ def main():
             input_nc=opt.unet_input_nc,
             output_nc=opt.unet_output_nc,
             weights=opt.weights_audio)
-    nets = (net_visual, net_audio)
+    net_text = builder.build_text(weights=opt.weights_text)
+
+    for param in net_text.parameters(): # 🥶 freeze the text encoder for now
+        param.requires_grad = False
+    nets = (net_visual, net_audio, net_text)
 
     # construct our audio-visual model
     model = AudioVisualModel(nets, opt) #前一行的nets pass進來這裡
