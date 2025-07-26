@@ -30,6 +30,7 @@ class TrainOptions(BaseOptions):
 		self.parser.add_argument('--weights_visual', type=str, default='', help="weights for visual stream")
 		self.parser.add_argument('--weights_audio', type=str, default='', help="weights for audio stream")
 		self.parser.add_argument('--weights_text', type=str, default='', help="weights for text stream (CLAP)")
+		self.parser.add_argument('--freeze_text', type=bool, default=True, help='freeze text encoder weights')
 		self.parser.add_argument('--unet_ngf', type=int, default=64, help="unet base channel dimension")
 		self.parser.add_argument('--unet_input_nc', type=int, default=2, help="input spectrogram number of channels")
 		self.parser.add_argument('--unet_output_nc', type=int, default=2, help="output spectrogram number of channels")

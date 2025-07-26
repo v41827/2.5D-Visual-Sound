@@ -85,10 +85,8 @@ def main():
             input_nc=opt.unet_input_nc,
             output_nc=opt.unet_output_nc,
             weights=opt.weights_audio)
-    net_text = builder.build_text(weights=opt.weights_text)
+    net_text = builder.build_text(weights=opt.weights_text, freeze=opt.freeze_text)
 
-    for param in net_text.parameters(): # 🥶 freeze the text encoder for now
-        param.requires_grad = False
     nets = (net_visual, net_audio, net_text)
 
     # construct our audio-visual model
@@ -118,7 +116,7 @@ def main():
 
             if(opt.measure_time):
                     iter_start_time = time.time()
-            for i, data in enumerate(dataset):
+            for i, data in enumerate(dataset): #在train.py(here)，每次訓練迭代時一次輸入一個 batch 的多模態資料，這些資料是由 custom_collate_fn() 預先對齊和打包好的
                     if(opt.measure_time):
                         torch.cuda.synchronize()
                         iter_data_loaded_time = time.time()
@@ -153,8 +151,6 @@ def main():
                             avg_loss = sum(batch_loss) / len(batch_loss)
                             print('Average loss: %.3f' % (avg_loss))
                             batch_loss = []
-                            # if opt.tensorboard:
-                            #     writer.add_scalar('data/loss', avg_loss, total_steps)
                             wandb.log({"train/loss": avg_loss, "steps": total_steps})
                             if(opt.measure_time):
                                     print('average data loading time: ' + str(sum(data_loading_time)/len(data_loading_time)))
@@ -169,6 +165,7 @@ def main():
                             print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
                             torch.save(net_visual.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, 'visual_latest.pth'))
                             torch.save(net_audio.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, 'audio_latest.pth'))
+                            torch.save(net_text.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, 'text_latest.pth'))
 
                     if(total_steps // opt.batchSize % opt.validation_freq == 0 and opt.validation_on):
                             model.eval()
@@ -185,6 +182,8 @@ def main():
                                 print('saving the best model (epoch %d, total_steps %d) with validation error %.3f\n' % (epoch, total_steps, val_err))
                                 torch.save(net_visual.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, 'visual_best.pth'))
                                 torch.save(net_audio.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, 'audio_best.pth'))
+                                torch.save(net_text.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, 'text_best.pth'))
+
 
                     if(opt.measure_time):
                             iter_start_time = time.time()
@@ -193,6 +192,7 @@ def main():
                     print('saving the model at the end of epoch %d, total_steps %d' % (epoch, total_steps))
                     torch.save(net_visual.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, str(epoch) + '_visual.pth'))
                     torch.save(net_audio.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, str(epoch) + '_audio.pth'))
+                    torch.save(net_text.state_dict(), os.path.join('.', opt.checkpoints_dir, opt.name, str(epoch) + '_text.pth'))
 
             #decrease learning rate 6% every opt.learning_rate_decrease_itr epochs
             if(opt.learning_rate_decrease_itr > 0 and epoch % opt.learning_rate_decrease_itr == 0):

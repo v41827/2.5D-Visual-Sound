@@ -24,13 +24,19 @@ class ModelBuilder():
         return net
 
     #builder for text stream
-    def build_text(self, weights=''):
+    def build_text(self, weights='', freeze=True):
+        # Always load the base pretrained CLAP model
         clap_model = ClapModel.from_pretrained("laion/clap-htsat-unfused")
         net = TextNet(clap_model)
 
-        if len(weights) > 0:
-            print('Loading weights for text stream')
+        if not freeze and len(weights) > 0:
+            print('Loading custom weights for text stream (for fine-tuning)')
             net.load_state_dict(torch.load(weights))
+
+        if freeze:
+            print('Freezing text encoder (using pretrained CLAP weights)')
+            for param in net.parameters():
+                param.requires_grad = False
         return net
 
     #builder for audio stream

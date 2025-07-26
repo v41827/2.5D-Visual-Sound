@@ -27,7 +27,7 @@ def normalize(samples, desired_rms = 0.1, eps = 1e-4):
   return samples
 
 def generate_spectrogram(audio):
-    spectro = librosa.core.stft(audio, n_fft=512, hop_length=160, win_length=400, center=True)
+    spectro = librosa.core.stft(audio, n_fft=512, hop_length=160, win_length=400, center=True) # in 2.5D paper section 4.2, Hann window length = 25ms, hop length = 10ms, FFT size = 512
     real = np.expand_dims(np.real(spectro), axis=0)
     imag = np.expand_dims(np.imag(spectro), axis=0)
     spectro_two_channel = np.concatenate((real, imag), axis=0)
