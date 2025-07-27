@@ -10,6 +10,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import functools
+from transformers import ClapProcessor
+
 """
 This script has the network architectures used in the Audio-Visual model.
 code flow: 
@@ -62,7 +64,8 @@ class TextNet(nn.Module):
     def __init__(self, clap_model):
         super(TextNet, self).__init__()
         self.clap = clap_model  # pre-trained CLAP model
-    
+        self.processor = ClapProcessor.from_pretrained("laion/clap-htsat-unfused")
+
     def forward(self, x):
         # x: text input (tokenized, etc.)
         return self.clap.get_text_features(**x) #(**x) 是對的，因為 Hugging Face CLAP 的輸入是一個 dictionary, refer to https://huggingface.co/docs/transformers/en/model_doc/clap#transformers.ClapModel.get_text_features

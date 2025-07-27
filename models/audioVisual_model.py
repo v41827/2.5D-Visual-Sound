@@ -29,11 +29,14 @@ class AudioVisualModel(torch.nn.Module): # defines the audio-visual model for tr
         audio_diff = input['audio_diff_spec']
         audio_mix = input['audio_mix_spec']
         text_input = input['text']
+        if isinstance(text_input, torch.Tensor):
+            text_feature = text_input  # from demo: already embedded
+        else:
+            text_feature = self.net_text(text_input)  # from training: need embedding
         audio_gt = Variable(audio_diff[:,:,:-1,:], requires_grad=False)
 
         input_spectrogram = Variable(audio_mix, requires_grad=False, volatile=volatile)
         visual_feature = self.net_visual(Variable(visual_input, requires_grad=False, volatile=volatile))
-        text_feature = self.net_text(text_input)
         mask_prediction = self.net_audio(input_spectrogram, visual_feature, text_feature)
 
         #complex masking to obtain the predicted spectrogram
