@@ -25,6 +25,14 @@ def audio_normalize(samples, desired_rms = 0.1, eps = 1e-4):
   samples = samples * (desired_rms / rms)
   return rms / desired_rms, samples
 
+def load_and_process_text(opt.test_text_path):
+	# Load and process the text file
+	texts = []
+	with open(opt.test_text_path, 'r') as f:
+		for line in f:
+			texts.append(line.strip())
+	return texts
+
 def main():
 	#load test arguments
 	opt = TestOptions().parse()
@@ -38,7 +46,8 @@ def main():
 	        input_nc=opt.unet_input_nc,
 	        output_nc=opt.unet_output_nc,
 	        weights=opt.weights_audio)
-	nets = (net_visual, net_audio)
+	net_text = builder.build_text(weights=opt.weights_text, freeze=opt.freeze_text)
+	nets = (net_visual, net_audio, net_text)
 
 	# construct our audio-visual model
 	model = AudioVisualModel(nets, opt)
@@ -55,6 +64,8 @@ def main():
 	vision_transform_list = [transforms.Resize((224,448)), transforms.ToTensor()]
 	vision_transform_list.append(transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]))
 	vision_transform = transforms.Compose(vision_transform_list)
+
+	#Text Stream
 
 	#perform spatialization over the whole audio using a sliding window approach
 	overlap_count = np.zeros((audio.shape)) #count the number of times a data point is calculated

@@ -65,7 +65,11 @@ class TextNet(nn.Module):
     
     def forward(self, x):
         # x: text input (tokenized, etc.)
-        return self.clap.get_text_features(**x) #(**x) 是對的，因為 Hugging Face CLAP 的輸入是一個 dictionary
+        return self.clap.get_text_features(**x) #(**x) 是對的，因為 Hugging Face CLAP 的輸入是一個 dictionary, refer to https://huggingface.co/docs/transformers/en/model_doc/clap#transformers.ClapModel.get_text_features
+
+    def get_text_embedding(self, list_of_strings, device):  #for now (20250727), 單點inference (跑demo) 用而已
+        inputs = self.processor(text=list_of_strings, return_tensors="pt", padding=True, truncation=True).to(device)
+        return self.forward(inputs)
 
 class AudioNet(nn.Module):
     def __init__(self, ngf=64, input_nc=2, output_nc=2):
