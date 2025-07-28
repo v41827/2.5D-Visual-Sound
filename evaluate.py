@@ -72,33 +72,54 @@ def main():
 	stft_distance_list = []
 	envelope_distance_list = []
 
-	audioNames = os.listdir(args.results_root)
-	index = 1
-	for audio_name in audioNames:
+	# Determine if results_root is a single experiment directory or contains multiple experiment subdirectories
+	if os.path.isfile(os.path.join(args.results_root, 'predicted_binaural.wav')):
+		experiment_dirs = [args.results_root]
+	else:
+		experiment_dirs = [
+			os.path.join(args.results_root, name)
+			for name in os.listdir(args.results_root)
+			if os.path.isdir(os.path.join(args.results_root, name))
+		]
+
+	for index, exp_dir in enumerate(experiment_dirs, start=1):
 		if index % 10 == 0:
-			print ("Evaluating testing example " + str(index) + " :", audio_name)
-		#check whether input binaural is mono, replicate to two channels if it's mono
+			print("Evaluating testing example", index, ":", exp_dir)
+
+		# Check whether input binaural is mono, replicate to two channels if it's mono
 		if args.real_mono:
-			mono_sound, audio_rate = librosa.load(os.path.join(args.results_root, audio_name, 'mixed_mono.wav'), sr=args.audio_sampling_rate)
+			mono_path = os.path.join(exp_dir, 'mixed_mono.wav')
+			if not os.path.exists(mono_path):
+				print(f"[Warning] Skipped {exp_dir}, no mixed_mono.wav found.")
+				continue
+			mono_sound, audio_rate = librosa.load(mono_path, sr=args.audio_sampling_rate)
 			predicted_binaural = np.repeat(np.expand_dims(mono_sound, 0), 2, axis=0)
 			if args.normalization:
 				predicted_binaural = normalize(predicted_binaural)
 		else:
-			predicted_binaural, audio_rate = librosa.load(os.path.join(args.results_root, audio_name, 'predicted_binaural.wav'), sr=args.audio_sampling_rate, mono=False)
+			pred_path = os.path.join(exp_dir, 'predicted_binaural.wav')
+			if not os.path.exists(pred_path):
+				print(f"[Warning] Skipped {exp_dir}, no predicted_binaural.wav found.")
+				continue
+			predicted_binaural, audio_rate = librosa.load(pred_path, sr=args.audio_sampling_rate, mono=False)
 			if args.normalization:
 				predicted_binaural = normalize(predicted_binaural)
-		gt_binaural, audio_rate = librosa.load(os.path.join(args.results_root, audio_name, 'input_binaural.wav'), sr=args.audio_sampling_rate, mono=False)
+
+		gt_path = os.path.join(exp_dir, 'input_binaural.wav')
+		if not os.path.exists(gt_path):
+			print(f"[Warning] Skipped {exp_dir}, no input_binaural.wav found.")
+			continue
+		gt_binaural, audio_rate = librosa.load(gt_path, sr=args.audio_sampling_rate, mono=False)
 		if args.normalization:
 			gt_binaural = normalize(gt_binaural)
-		
-		#get results for this audio
+
+		# Get results for this audio
 		stft_distance_list.append(STFT_L2_distance(predicted_binaural, gt_binaural))
 		envelope_distance_list.append(Envelope_distance(predicted_binaural, gt_binaural))
-		index = index + 1
 
-	#print the results
-	print ("STFT L2 Distance: ", stat.mean(stft_distance_list), stat.stdev(stft_distance_list), stat.stdev(stft_distance_list) / np.sqrt(len(stft_distance_list)))
-	print ("Average Envelope Distance: ", stat.mean(envelope_distance_list), stat.stdev(envelope_distance_list), stat.stdev(envelope_distance_list) / np.sqrt(len(envelope_distance_list)))
+	# Print the results
+	print("STFT L2 Distance: ", stat.mean(stft_distance_list), stat.stdev(stft_distance_list), stat.stdev(stft_distance_list) / np.sqrt(len(stft_distance_list)))
+	print("Average Envelope Distance: ", stat.mean(envelope_distance_list), stat.stdev(envelope_distance_list), stat.stdev(envelope_distance_list) / np.sqrt(len(envelope_distance_list)))
 
 if __name__ == '__main__':
 	main()
