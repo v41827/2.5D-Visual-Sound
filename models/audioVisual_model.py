@@ -29,7 +29,7 @@ class AudioVisualModel(torch.nn.Module): # defines the audio-visual model for tr
         audio_diff = input['audio_diff_spec']
         audio_mix = input['audio_mix_spec']
         text_input = input['text']
-        if isinstance(text_input, torch.Tensor):
+        if isinstance(text_input, torch.Tensor): #this if else section is used to check if text_input is already embedded or not - for flexibility, avoid throwing an error when there are different text input types
             text_feature = text_input  # from demo: already embedded
         else:
             text_feature = self.net_text(text_input)  # from training: need embedding
