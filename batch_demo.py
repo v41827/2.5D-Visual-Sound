@@ -5,10 +5,14 @@ import argparse
 from pathlib import Path
 
 """
-Standalone batch runner for demo.py across FAIR-Play 10 splits.
-- Picks split-specific checkpoints automatically: <ckpt_root>/split{k}/mono2binaural/{visual,audio}_best.pth
+Standalone batch runner for demo.py across FAIR-Play splits.
+
+- Picks split-specific checkpoints automatically:
+  <ckpt_root>/split{k}/mono2binaural/{visual,audio}_best.pth
 - Reads IDs from each split's test.h5 (dataset key: 'audio'), extracting the stem (e.g., '001353')
 - Builds demo.py CLI per ID and executes it
+- Creates per-split output folders:
+  <output_root>/<output_split_prefix><k>/BaseSplit<k>_<ID>/
 - No shell wrapper needed
 """
 
@@ -32,14 +36,22 @@ def main():
     ap.add_argument("--dry_run", action="store_true", help="Only print commands, do not execute them")
 
     # --- Sensible defaults so you can run with few/no flags ---
-    ap.add_argument("--fairplay_root", default="/scratch/yc01847/FAIR-Play",help="Root of FAIR-Play (contains binaural_audios/, frames/, splits/, etc.)")
-    ap.add_argument("--splits_root", default=None, help="Optional. If omitted, uses <fairplay_root>/splits")
-    ap.add_argument("--output_root", default="/scratch/yc01847/Base_demo_output",help="Where to write demo outputs")
-    ap.add_argument("--output_split_folder_name", default="Base_demo_split1", help="Name of the split folder to use (e.g., AVT_demo_split1, AVT_demo_split2, etc.)")
+    ap.add_argument("--fairplay_root", default="/scratch/yc01847/FAIR-Play",
+                    help="Root of FAIR-Play (contains binaural_audios/, frames/, splits/, etc.)")
+    ap.add_argument("--splits_root", default=None,
+                    help="Optional. If omitted, uses <fairplay_root>/splits")
+    ap.add_argument("--output_root", default="/scratch/yc01847/Base_demo_output",
+                    help="Where to write demo outputs")
+
+    # NEW: prefix that becomes Base_demo_split1, Base_demo_split2, ...
+    ap.add_argument("--output_split_prefix", default="Base_demo_split",
+                    help="Prefix for per-split output folders (e.g., Base_demo_split -> Base_demo_split1, ...)")
+
     ap.add_argument("--num_splits", type=int, default=10)
 
     # Split-specific checkpoints are derived automatically under this root
-    ap.add_argument("--ckpt_root", default="/scratch/yc01847/2.5D-Visual-Sound/checkpoints",help="Root containing split{k}/mono2binaural/{visual,audio}_best.pth")
+    ap.add_argument("--ckpt_root", default="/scratch/yc01847/2.5D-Visual-Sound/checkpoints",
+                    help="Root containing split{k}/mono2binaural/{visual,audio}_best.pth")
 
     # Demo/runtime knobs
     ap.add_argument("--audio_sampling_rate", type=int, default=16000)
@@ -53,7 +65,6 @@ def main():
 
     # Resolve derived paths
     splits_root = args.splits_root or os.path.join(args.fairplay_root, "splits")
-
     binaural_dir = os.path.join(args.fairplay_root, "binaural_audios")
     frames_dir   = os.path.join(args.fairplay_root, "frames")
 
@@ -64,6 +75,8 @@ def main():
     print("[info] splits_root=", splits_root)
     print("[info] ckpt_root=", args.ckpt_root)
     print("[info] output_root=", args.output_root)
+    print("[info] output_split_prefix=", args.output_split_prefix)
+    print("[info] num_splits=", args.num_splits)
     print("[info] demo_py=", args.demo_py)
 
     for k in range(1, args.num_splits + 1):
@@ -87,6 +100,11 @@ def main():
             # skip this split if weights are missing
             continue
 
+        # per-split output base
+        split_folder = f"{args.output_split_prefix}{k}"
+        base_output_dir = os.path.join(args.output_root, split_folder)
+        Path(base_output_dir).mkdir(parents=True, exist_ok=True)
+
         for id_ in ids:
             input_audio_path = os.path.join(binaural_dir, f"{id_}.wav")
 
@@ -97,14 +115,9 @@ def main():
             else:
                 video_frame_path = os.path.join(frames_dir, f"{id_}.mp4")
 
-
-
             # one output dir per (split, id)
-            base_output_dir = os.path.join(args.output_root, args.output_split_folder_name)
-            Path(base_output_dir).mkdir(parents=True, exist_ok=True)
             output_dir_root = os.path.join(base_output_dir, f"BaseSplit{k}_{id_}")
             Path(output_dir_root).mkdir(parents=True, exist_ok=True)
-            
 
             cmd = [
                 "python", args.demo_py,
