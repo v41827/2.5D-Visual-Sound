@@ -1,9 +1,9 @@
 #!/bin/bash
-source /scratch/yc01847/miniconda3/etc/profile.d/conda.sh
-conda activate visual-sound
+
+
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-python train.py \
+python3 train.py \
   --hdf5FolderPath /scratch/yc01847/FAIR-Play/splits/split1 \
   --name mono2binaural \
   --model audioVisual \
@@ -16,7 +16,7 @@ python train.py \
   --niter 500 \
   --lr_visual 0.0001 \
   --lr_audio 0.001 \
-  --nThreads 4 \
+  --nThreads 5 \
   --gpu_ids 0 \
   --validation_on \
   --validation_freq 100 \

@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # h5_path = sys.argv[1]
     # old_prefix = sys.argv[2]
     # new_prefix = sys.argv[3]
-    h5_path = '/scratch/yc01847/FAIR-Play/splits/split10/train.h5'
+    h5_path = '/scratch/yc01847/FAIR-Play/splits/split1/test.h5'
     old_prefix = '/private/home/rhgao/datasets/BINAURAL_MUSIC_ROOM/binaural16k/'
     new_prefix = '/scratch/yc01847/FAIR-Play/binaural_audios/'
 
