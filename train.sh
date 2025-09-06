@@ -4,10 +4,10 @@
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 python3 train.py \
-  --hdf5FolderPath /scratch/yc01847/FAIR-Play/splits/split1 \
+  --hdf5FolderPath /scratch/yc01847/FAIR-Play/splits/split7 \
   --name mono2binaural \
   --model audioVisual \
-  --checkpoints_dir /scratch/yc01847/2.5D-Visual-Sound/checkpoints/split1 \
+  --checkpoints_dir /scratch/yc01847/2.5D-Visual-Sound/checkpoints/split7 \
   --save_epoch_freq 50 \
   --save_latest_freq 100 \
   --display_freq 10 \
