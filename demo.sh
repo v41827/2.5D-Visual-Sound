@@ -1,17 +1,20 @@
 #!/bin/bash
-source /scratch/yc01847/miniconda3/etc/profile.d/conda.sh
-conda activate visual-sound
+
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-# Run the demo
-python demo.py \
-  --input_audio_path "/scratch/yc01847/FAIR-Play/binaural_audios/001353.wav" \
-  --video_frame_path "/scratch/yc01847/FAIR-Play/frames/001353.mp4" \
-  --test_text_path "/scratch/yc01847/FAIR-Play/sampled_output_step10/001353.csv" \
-  --hdf5FolderPath "/scratch/yc01847/FAIR-Play/splits/split1" \
-  --text_folder_name "sampled_output_step10" \
-  --weights_visual "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/AVT_text_frozen/split1/mono2binaural/visual_best.pth" \
-  --weights_audio "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/AVT_text_frozen/split1/mono2binaural/audio_best.pth" \
-  --freeze_text True \
-  --output_dir_root "/scratch/yc01847/2.5D-Visual-Sound/demo_output/AVTsplit1_001353" \
-  --input_audio_length 10 \
-  --hop_size 0.05
+
+ids="000794 001158 001353 001401 001495 000980 001204 000226 000768 001617 001372 001620 001086 000064 001595 001063 000438 001585 001523 001135 001405 001591 000776 000087 001807 000010 001004 000745 000178 001107 001283 001205 000079 001008 001023 000543 000952 001500 000041 000994 001057 001396 001558 001123 001036 000805 000823 000326 001469 001852 000329 001399 001040 001323 000498 000281 000093 001589 000132 000690 000565 001367 000847 001285 000631 001075 000928 000550 000462 001384 000341 001118 001024 000960 001177 001436 000541 000664 001420 000924 000059 000907 000294 001462 000366 001821 001312 000057 001184 001043 000145 000667 000406 001656 001228 000384 000757 001042 001319 000103 000061 000485 001700 000624 000764 001155 001289 001539 000821 000268 001773 001717 000407 000958 000596 000490 001393 001428 000320 001198 000592 001185 000961 000451 001073 001171 001445 000214 000825 001206 000363 001631 001047 001440 001603 000535 000734 000686 000622 000165 001524 001025 001015 000992 001641 001502 001691 001193 001745 000855 000628 000753 000378 000088 000016 000809 001581 001743 001053 001377 000408 001690 000402 000769 001218 000597 001406 001501 001318 000898 000431 001867 000681 000460 000636 000457 001416 001802 001648 000806 000287 000266 000612 000756 001360 001477 001131"
+
+for id in $ids; do
+  echo "Processing $id"
+  python demo.py \
+    --input_audio_path "/scratch/yc01847/FAIR-Play/binaural_audios/${id}.wav" \
+    --video_frame_path "/scratch/yc01847/FAIR-Play/frames/${id}.mp4" \
+    --test_text_path "/scratch/yc01847/FAIR-Play/sampled_output_step10/${id}.csv" \
+    --hdf5FolderPath "/scratch/yc01847/FAIR-Play/splits/split1" \
+    --text_folder_name "sampled_output_step10" \
+    --weights_visual "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/AVT_text_frozen/split1/mono2binaural/visual_best.pth" \
+    --weights_audio "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/AVT_text_frozen/split1/mono2binaural/audio_best.pth" \
+    --output_dir_root "/scratch/yc01847/2.5D-Visual-Sound/demo_output/AVTSplit1/AVSplit1_${id}" \
+    --input_audio_length 10 \
+    --hop_size 0.05
+done
