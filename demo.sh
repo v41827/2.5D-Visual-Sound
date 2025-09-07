@@ -11,8 +11,8 @@ for id in $ids; do
     --input_audio_path "/scratch/yc01847/FAIR-Play/binaural_audios/${id}.wav" \
     --video_frame_path "/scratch/yc01847/FAIR-Play/frames/${id}.mp4" \
     --hdf5FolderPath "/scratch/yc01847/FAIR-Play/splits/split1" \
-    --weights_visual "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/mono2binaural/visual_best.pth" \
-    --weights_audio "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/mono2binaural/audio_best.pth" \
+    --weights_visual "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/split1/mono2binaural/visual_best.pth" \
+    --weights_audio "/scratch/yc01847/2.5D-Visual-Sound/checkpoints/split1/mono2binaural/audio_best.pth" \
     --output_dir_root "/scratch/yc01847/2.5D-Visual-Sound/demo_output/BaseSplit1_${id}" \
     --input_audio_length 10 \
     --hop_size 0.05
